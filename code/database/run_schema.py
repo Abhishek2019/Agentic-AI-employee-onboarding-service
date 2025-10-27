@@ -41,3 +41,4 @@ if __name__ == "__main__":
 #--------------------------------------------------
 #CMD
 # python run_schema.py schema.sql
+# python run_schema.py add_seats_equipments.sql
