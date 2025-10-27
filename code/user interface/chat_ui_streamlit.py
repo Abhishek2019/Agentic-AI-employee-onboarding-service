@@ -3,6 +3,12 @@ import time
 import requests
 import streamlit as st
 
+from employee import Employee
+
+# one object per session
+if "employee" not in st.session_state:
+    st.session_state.employee = Employee()
+
 
 # -------------------------------
 # Page / Layout
