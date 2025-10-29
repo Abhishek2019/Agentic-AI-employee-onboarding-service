@@ -18,18 +18,22 @@ class Employee:
     phone: Optional[str] = None
     employee_ID: Optional[int] = None  # filled after insert (RETURNING)
 
-    # ---- Extra details captured via chat (not necessarily in employees table) ----
-    address: Optional[str] = None
-    seat_pref: Optional[SeatType] = None          # desired seat type
+    # ---- DB columns (seating_space table) ----
+    seat_id: Optional[int] = None
+    seat_type: Optional[SeatType] = None          # desired seat type
+    
+    # ---- DB columns (equipment table) ----
     os_requirement: Optional[OSType] = None       # for laptop
-    primary_equipment: Optional[EquipType] = None # typically "laptop"
-    notes: str = ""
+    equipment_type: Optional[EquipType] = None # typically "laptop"
+    equipment_serial: Optional[str] = None
+    equipment_id: Optional[int] = None
 
     # ---- Runtime flags ----
     confirmed: bool = False                       # set true after user approves plan
 
     # ---------- business logic ----------
-    REQUIRED_FIELDS = ("name", "email")  # add "phone" if you want it mandatory
+    REQUIRED_FIELDS = ("name", "email", "phone", "seat_id", "seat_type", "equipment_type", 
+                       "equipment_serial", "os_requirement", "equipment_id")  # add "phone" if you want it mandatory
 
     def is_ready_for_insert(self) -> bool:
         """Minimal readiness for creating the employees row."""

@@ -2,12 +2,48 @@ import os
 import time
 import requests
 import streamlit as st
+from typing import TypedDict, Annotated
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy import event, text
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
 
 from employee import Employee
+
+@st.cache_resource
+def get_async_engine():
+    dsn = os.getenv("DATABASE_URL")
+    engine = create_async_engine(
+        dsn,
+        pool_size=10,
+        max_overflow=5,
+        pool_pre_ping=True,
+        pool_recycle=1800,
+        isolation_level="READ COMMITTED",
+        future=True,
+    )
+
+    # set search_path on each new DBAPI conn (note: use .sync_engine for async)
+    # @event.listens_for(engine.sync_engine, "connect")
+    # def _set_search_path(dbapi_conn, conn_record):
+    #     cur = dbapi_conn.cursor()
+    #     cur.execute("SET search_path TO onboarding, public")
+    #     cur.close()
+
+    return engine
+
+@st.cache_resource
+def get_async_sessionmaker():
+    return async_sessionmaker(bind=get_async_engine(), expire_on_commit=False)
+
 
 # one object per session
 if "employee" not in st.session_state:
     st.session_state.employee = Employee()
+
+
 
 
 # -------------------------------
@@ -22,6 +58,7 @@ st.caption("Type below to chat.")
 # -------------------------------
 # Session State for Messages
 # -------------------------------
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -49,6 +86,14 @@ def backend_reply(user_text: str, history: list[str]) -> str:
     # Local simple logic (placeholder):
     text = user_text.strip().lower()
 
+    st.session_state.employee.seat_type = "cabin"
+
+    from llm_tools import assign_seating_space
+    out = asyncio.run(assign_seating_space(get_async_sessionmaker(), st.session_state.employee.seat_type))
+    print(out, type(out))
+
+    print(out)
+    print(type(out))
     # Default echo with slight delay to mimic thinking
     time.sleep(0.2)
     return "Your input text is: "+text
