@@ -17,15 +17,17 @@ POOL: ConnectionPool = ConnectionPool(
 )
 
 @mcp.tool
-def assign_seating_space(seat_type: Optional[str] = None) -> dict:
+async def assign_seating_space(seat_type: Optional[str] = None) -> dict:
     """
-    Returns one available seat (seat_id, seat_type) or a message if none found.
+    Assign me a available seat to employee as if optional seating type (seat_id, seat_type) or a message if none found.
     """
+
+    print("seating type -------------------", seat_type)
     sql = """
         SELECT ss.seat_id, ss.seat_type
         FROM onboarding.seating_space ss
         WHERE ss.employee_id IS NULL
-        AND (%(seat_type)s IS NULL OR ss.seat_type = %(seat_type)s)
+        AND (%(seat_type)s::text IS NULL OR ss.seat_type = %(seat_type)s::text)
         ORDER BY random()
         LIMIT 1;
     """
